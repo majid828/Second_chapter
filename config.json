@@ -1,0 +1,22 @@
+{
+  "btc_csv": "examples/synthetic_btc.csv",
+  "snapshot_csv": "examples/synthetic_snapshots.csv",
+  "output_dir": "output",
+  "sites": ["site_A", "site_B", "site_C"],
+  "preprocess": {
+    "btc_uniform_points": 400,
+    "snapshot_uniform_points": 250,
+    "sg_window": 21,
+    "sg_polyorder": 3,
+    "gaussian_sigma": 2.0,
+    "clip_negative_to_zero": true
+  },
+  "kernel": {
+    "regularization_eps": 1e-8,
+    "normalize_kernels": true,
+    "min_positive_floor": 1e-10
+  },
+  "plots": {
+    "dpi": 160
+  }
+}
