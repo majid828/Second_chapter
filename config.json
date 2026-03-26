@@ -3,6 +3,7 @@
   "snapshot_csv": "examples/synthetic_snapshots.csv",
   "output_dir": "output",
   "sites": ["site_A", "site_B", "site_C"],
+
   "preprocess": {
     "btc_uniform_points": 400,
     "snapshot_uniform_points": 250,
@@ -11,11 +12,25 @@
     "gaussian_sigma": 2.0,
     "clip_negative_to_zero": true
   },
+
+  "inference": {
+    "advective_window_fraction": 0.4,
+    "use_snapshot_moments_as_support": false,
+    "deconvolution_eps": 1e-8,
+    "normalize_advective_kernel": true,
+    "normalize_retention_kernel": true
+  },
+
   "kernel": {
     "regularization_eps": 1e-8,
     "normalize_kernels": true,
     "min_positive_floor": 1e-10
   },
+
+  "reconstruction": {
+    "rescale_reconstructed_btc_to_observed_mass": true
+  },
+
   "plots": {
     "dpi": 160
   }
