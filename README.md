@@ -1,118 +1,128 @@
-# Multi-Site Memory Kernel Recovery Pipeline
+# Multi-Site BTC Decomposition and Memory Kernel Recovery
 
-This repository is a research-oriented, modular Python pipeline for:
+This repository provides a **modular research pipeline** for analyzing breakthrough curve (BTC) data and plume snapshots using a **new inverse decomposition framework**:
 
-1. Loading noisy, discrete BTC and plume snapshot data.
-2. Denoising and smoothing the data.
-3. Estimating effective velocity-like and retention-like signals.
-4. Recovering memory kernels from those signals.
-5. Comparing velocity-derived and retention-derived kernels.
-6. Fitting interpretable equations to recovered kernel curves.
-7. Plotting all intermediate and final results.
+\[
+\text{BTC}(t) \approx g(t) * h(t)
+\]
 
-## Important scientific note
+where:
 
-This code provides a **careful computational scaffold** for your chapter idea. It does **not** claim that velocity and retention are uniquely observable from BTCs alone. Instead, it constructs **effective velocity-related and retention-related proxies** from smoothed transport data under explicit assumptions. That makes it suitable for exploratory research, benchmarking, synthetic tests, and multi-site comparison.
+- \(g(t)\) = **advective (velocity) kernel**
+- \(h(t)\) = **retention (memory) kernel**
 
-## Repository structure
+---
+
+#  Key Idea (What makes this different)
+
+Instead of directly extracting velocity and retention using predefined transforms, this framework:
+
+1. **Denoises and smooths BTC and snapshot data**
+2. **Decomposes BTC into two physically meaningful components**:
+   - advective transport \(g(t)\)
+   - retention/delay \(h(t)\)
+3. **Reconstructs BTC using convolution**:
+   \[
+   f(t) \approx g(t) * h(t)
+   \]
+4. **Fits interpretable equations** to both \(g(t)\) and \(h(t)\)
+5. Compares results across multiple sites
+
+---
+
+#  Scientific Note (Important)
+
+This framework **does NOT assume unique identifiability** of velocity and retention from BTC alone.
+
+Instead, it:
+
+- infers **effective kernels**
+- uses **regularization and normalization constraints**
+- provides a **data-driven but physically interpretable decomposition**
+
+This makes it suitable for:
+- exploratory research
+- synthetic validation
+- multi-site comparison
+- hypothesis testing
+
+---
+
+#  Repository Structure
 
 - `run_pipeline.py`  
-  Main entry point. This is the file you run.
+  Main entry point.
 
 - `example_generate_synthetic.py`  
-  Creates synthetic noisy BTC and snapshot data for testing.
+  Generates synthetic BTC and snapshot data.
 
 - `config.json`  
-  Main configuration file.
+  Controls preprocessing, inference, and kernel settings.
 
-- `src/io_utils.py`  
-  Reading input CSV files and writing outputs.
+---
 
-- `src/preprocess.py`  
-  Denoising, interpolation, smoothing, and signal cleanup.
+## Core Modules (`src/`)
 
-- `src/inference.py`  
-  Builds effective velocity-like and retention-like signals from smoothed data.
+- `io_utils.py`  
+  Load/save data and outputs.
 
-- `src/kernels.py`  
-  Computes kernels from velocity and retention pathways.
+- `preprocess.py`  
+  Denoising and smoothing:
+  - Random Forest denoising
+  - spline interpolation
+  - Savitzky–Golay filtering
+  - Gaussian smoothing
 
-- `src/symbolic_fit.py`  
-  Fits interpretable candidate equations to recovered kernels.
+- `inference.py`  
+  Core decomposition:
+  - estimates **advective kernel \(g(t)\)**
+  - estimates **retention kernel \(h(t)\)** via deconvolution
 
-- `src/plotting.py`  
-  All plotting utilities.
+- `kernels.py`  
+  - regularizes kernels  
+  - normalizes kernels  
+  - reconstructs BTC via convolution  
+  - computes reconstruction error  
 
-- `src/pipeline.py`  
-  Orchestrates the full workflow across sites.
+- `symbolic_fit.py`  
+  Fits interpretable equations to:
+  - \(g(t)\)
+  - \(h(t)\)
 
-- `examples/`  
-  Example synthetic input data.
+- `plotting.py`  
+  Generates:
+  - BTC preprocessing plots  
+  - kernel plots  
+  - BTC reconstruction plots  
+  - equation fits  
 
-- `output/`  
-  All generated figures and summaries.
+- `pipeline.py`  
+  Runs the full workflow across all sites
 
-## Input data format
+---
 
-### BTC CSV
+#  Input Data Format
+
+## BTC CSV
+
 Required columns:
 - `site`
 - `time`
 - `concentration`
 
-### Snapshot CSV
+## Snapshot CSV
+
 Required columns:
 - `site`
 - `time`
 - `distance`
 - `concentration`
 
-## Quick start
+---
 
-### 1. Generate example data
+#  Quick Start
+
+## 1. Generate synthetic data
+
 ```bash
 python example_generate_synthetic.py
-```
-
-### 2. Run the full pipeline
-```bash
-python run_pipeline.py --config config.json
-```
-
-## Outputs
-
-For each site, the code saves:
-- raw vs denoised vs smoothed BTC plots
-- raw vs denoised vs smoothed snapshot plots
-- effective velocity-like signal plots
-- effective retention-like signal plots
-- velocity kernel plots
-- retention kernel plots
-- direct smoothed BTC kernel plots
-- kernel comparison plots
-- equation fit comparison plots
-- a site summary JSON file
-
-It also saves cross-site summaries for comparing fitted kernel families.
-
-## Symbolic regression / equation fitting
-
-The current code fits a library of interpretable kernel families such as:
-- exponential
-- stretched exponential
-- power law
-- tempered power law
-- gamma-type kernel
-
-It selects the best candidate using a weighted error + complexity score.
-
-This is designed to be robust for GitHub use. If later you want, you can replace `src/symbolic_fit.py` with a PySR-based version.
-
-## Recommended workflow for your chapter
-
-1. Start with synthetic data.
-2. Check whether velocity-derived or retention-derived kernels are more stable.
-3. Apply to real sites.
-4. Compare recovered parameter values across sites.
-5. Test whether one kernel family explains all sites with site-specific parameters.
-
