@@ -5,6 +5,7 @@ from typing import Dict
 
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.signal import fftconvolve
 
 from .inference import EffectiveSignals, SnapshotMoments
 from .kernels import KernelSet
@@ -16,6 +17,16 @@ def _savefig(path: str | Path, dpi: int = 160) -> None:
     plt.tight_layout()
     plt.savefig(path, dpi=dpi, bbox_inches="tight")
     plt.close()
+
+
+def _reconstruct_btc_from_kernels(time: np.ndarray, g: np.ndarray, h: np.ndarray) -> np.ndarray:
+    """
+    Reconstruct BTC from the convolution of the advective kernel g(t)
+    and the retention kernel h(t).
+    """
+    dt = float(np.mean(np.diff(time))) if len(time) > 1 else 1.0
+    recon = fftconvolve(g, h, mode="full")[: len(time)] * dt
+    return np.maximum(recon, 0.0)
 
 
 def plot_btc_preprocessing(site: str, sm: SmoothedSeries, outdir: Path, dpi: int = 160) -> None:
@@ -55,23 +66,51 @@ def plot_snapshot_moments(site: str, moments: SnapshotMoments, outdir: Path, dpi
 
 
 def plot_effective_signals(site: str, sig: EffectiveSignals, outdir: Path, dpi: int = 160) -> None:
+    """
+    Plot the new decomposed signals:
+      - smoothed BTC
+      - advective/velocity kernel g(t)
+      - retention kernel h(t)
+      - residual/direct signal
+      - reconstructed BTC from g*h
+    """
+    reconstructed = _reconstruct_btc_from_kernels(
+        sig.time,
+        sig.velocity_signal,
+        sig.retention_signal,
+    )
+
     plt.figure(figsize=(10, 6))
-    plt.plot(sig.time, sig.btc_smooth, label="Smoothed BTC")
-    plt.plot(sig.time, sig.velocity_signal, label="Velocity-like signal")
-    plt.plot(sig.time, sig.retention_signal, label="Retention-like signal")
-    plt.plot(sig.time, sig.direct_kernel_signal, label="Direct BTC kernel signal")
+    plt.plot(sig.time, sig.btc_smooth, label="Smoothed BTC", linewidth=2)
+    plt.plot(sig.time, reconstructed, label="Reconstructed BTC = g*h", linestyle="--", linewidth=2)
+    plt.plot(sig.time, sig.velocity_signal, label="Advective kernel g(t)")
+    plt.plot(sig.time, sig.retention_signal, label="Retention kernel h(t)")
+    plt.plot(sig.time, sig.direct_kernel_signal, label="Residual / direct signal", alpha=0.9)
     plt.xlabel("Time")
     plt.ylabel("Signal amplitude")
-    plt.title(f"{site}: effective signals")
+    plt.title(f"{site}: BTC decomposition into advective and retention components")
     plt.legend()
     _savefig(outdir / f"{site}_effective_signals.png", dpi=dpi)
 
 
 def plot_kernels(site: str, kernels: KernelSet, outdir: Path, dpi: int = 160) -> None:
+    """
+    Plot recovered kernels using new interpretation:
+      - velocity_kernel = advective kernel g(t)
+      - retention_kernel = retention kernel h(t)
+      - direct_kernel = optional residual/direct kernel
+    """
+    reconstructed = _reconstruct_btc_from_kernels(
+        kernels.time,
+        kernels.velocity_kernel,
+        kernels.retention_kernel,
+    )
+
     plt.figure(figsize=(10, 6))
-    plt.plot(kernels.time, kernels.velocity_kernel, label="Velocity kernel")
-    plt.plot(kernels.time, kernels.retention_kernel, label="Retention kernel")
-    plt.plot(kernels.time, kernels.direct_kernel, label="Direct kernel")
+    plt.plot(kernels.time, kernels.velocity_kernel, label="Advective kernel g(t)")
+    plt.plot(kernels.time, kernels.retention_kernel, label="Retention kernel h(t)")
+    plt.plot(kernels.time, kernels.direct_kernel, label="Residual / direct kernel")
+    plt.plot(kernels.time, reconstructed, label="Reconstructed BTC = g*h", linestyle="--")
     plt.xlabel("Time")
     plt.ylabel("Kernel value")
     plt.title(f"{site}: kernel comparison")
@@ -87,6 +126,30 @@ def plot_single_kernel(site: str, time: np.ndarray, kernel: np.ndarray, name: st
     plt.title(f"{site}: {name}")
     plt.legend()
     _savefig(outdir / f"{site}_{name.lower().replace(' ', '_')}.png", dpi=dpi)
+
+
+def plot_btc_reconstruction(
+    site: str,
+    time: np.ndarray,
+    btc_smooth: np.ndarray,
+    g: np.ndarray,
+    h: np.ndarray,
+    outdir: Path,
+    dpi: int = 160,
+) -> None:
+    """
+    Dedicated plot for BTC reconstruction from g(t) and h(t).
+    """
+    reconstructed = _reconstruct_btc_from_kernels(time, g, h)
+
+    plt.figure(figsize=(10, 5))
+    plt.plot(time, btc_smooth, label="Smoothed BTC", linewidth=2)
+    plt.plot(time, reconstructed, label="Reconstructed BTC = g*h", linestyle="--", linewidth=2)
+    plt.xlabel("Time")
+    plt.ylabel("Concentration")
+    plt.title(f"{site}: observed vs reconstructed BTC")
+    plt.legend()
+    _savefig(outdir / f"{site}_btc_reconstruction.png", dpi=dpi)
 
 
 def plot_equation_fit(site: str, time: np.ndarray, kernel: np.ndarray, fit: FitResult, tag: str, outdir: Path, dpi: int = 160) -> None:
