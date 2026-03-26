@@ -125,7 +125,17 @@ def plot_single_kernel(site: str, time: np.ndarray, kernel: np.ndarray, name: st
     plt.ylabel("Kernel value")
     plt.title(f"{site}: {name}")
     plt.legend()
-    _savefig(outdir / f"{site}_{name.lower().replace(' ', '_')}.png", dpi=dpi)
+
+    safe_name = (
+        name.lower()
+        .replace(" ", "_")
+        .replace("/", "_")
+        .replace("\\", "_")
+        .replace("(", "")
+        .replace(")", "")
+    )
+
+    _savefig(outdir / f"{site}_{safe_name}.png", dpi=dpi)
 
 
 def plot_btc_reconstruction(
@@ -160,7 +170,17 @@ def plot_equation_fit(site: str, time: np.ndarray, kernel: np.ndarray, fit: FitR
     plt.ylabel("Kernel value")
     plt.title(f"{site}: {tag} equation fit\n{fit.equation}")
     plt.legend()
-    _savefig(outdir / f"{site}_{tag.lower().replace(' ', '_')}_equation_fit.png", dpi=dpi)
+
+    safe_tag = (
+        tag.lower()
+        .replace(" ", "_")
+        .replace("/", "_")
+        .replace("\\", "_")
+        .replace("(", "")
+        .replace(")", "")
+    )
+
+    _savefig(outdir / f"{site}_{safe_tag}_equation_fit.png", dpi=dpi)
 
 
 def plot_cross_site_family_parameters(parameter_table, outdir: Path, dpi: int = 160) -> None:
