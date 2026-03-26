@@ -15,8 +15,9 @@
 
   "inference": {
     "advective_window_fraction": 0.4,
-    "use_snapshot_moments_as_support": false,
     "deconvolution_eps": 1e-8,
+    "deconvolution_alpha": 1e-3,
+    "retention_smooth_passes": 2,
     "normalize_advective_kernel": true,
     "normalize_retention_kernel": true
   },
