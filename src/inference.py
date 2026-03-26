@@ -1,5 +1,5 @@
 from scipy.signal import fftconvolve
-
+import numpy as np
 
 def _normalize_pdf(y: np.ndarray, x: np.ndarray) -> np.ndarray:
     area = np.trapezoid(y, x)
