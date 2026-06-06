@@ -28,15 +28,19 @@
     "min_positive_floor": 1e-10
   },
 
-  "shared_family": {
+  "shared_symbolic": {
     "kernel_name": "retention_kernel",
     "complexity_weight": 0.01,
-    "families": [
-      "exponential",
-      "stretched_exponential",
-      "power_law",
-      "tempered_power_law",
-      "gamma_type"
+    "structures": [
+      "exp",
+      "power",
+      "stretched_exp",
+      "tempered_power",
+      "gamma_type",
+      "two_exp",
+      "exp_plus_power",
+      "tempered_plus_exp",
+      "softplus_exp_exp"
     ]
   },
 
