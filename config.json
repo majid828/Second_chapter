@@ -2,10 +2,10 @@
   "btc_csv": "examples/synthetic_btc.csv",
   "snapshot_csv": "examples/synthetic_snapshots.csv",
   "output_dir": "output",
-  "sites": ["site_A", "site_B", "site_C"],
+  "sites": ["site_A", "site_B", "site_C", "site_D", "site_E", "site_F", "site_G", "site_H", "site_I", "site_J"],
 
   "preprocess": {
-    "btc_uniform_points": 400,
+    "btc_uniform_points": 450,
     "snapshot_uniform_points": 250,
     "sg_window": 21,
     "sg_polyorder": 3,
