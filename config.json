@@ -1,8 +1,8 @@
 {
   "btc_csv": "examples/synthetic_btc.csv",
-  "snapshot_csv": "data/made_digitized_snapshots_for_pipeline.csv",
-  "output_dir": "output_made_snapshots_with_synthetic_btc",
-  "sites": ["MADE"],
+  "snapshot_csv": "data/zhang2010_snapshots_siteA_MADE_siteB_CapeCod.csv",
+  "output_dir": "output_zhang2010_snapshots_with_synthetic_btc",
+  "sites": ["site_A", "site_B"],
 
   "preprocess": {
     "btc_uniform_points": 450,
